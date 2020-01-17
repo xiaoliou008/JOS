@@ -6,7 +6,7 @@
 #endif
 
 // Represents true-or-false values
-typedef _Bool bool;
+typedef _Bool bool;	
 enum { false, true };
 
 // Explicitly-sized versions of integer types
@@ -24,8 +24,8 @@ typedef unsigned long long uint64_t;
 // uintptr_t to represent the numerical values of virtual addresses,
 // and physaddr_t to represent physical addresses.
 typedef int32_t intptr_t;
-typedef uint32_t uintptr_t;
-typedef uint32_t physaddr_t;
+typedef uint32_t uintptr_t;			/// virtual addr
+typedef uint32_t physaddr_t;		/// physical addr
 
 // Page numbers are 32 bits long.
 typedef uint32_t ppn_t;
@@ -39,7 +39,8 @@ typedef int32_t ssize_t;
 // off_t is used for file offsets and lengths.
 typedef int32_t off_t;
 
-// Efficient min and max operations
+// Efficient min and max operations			
+// 注意：小括号内套大括号，则整个是一个表达式，值为大括号内最后一个表达式的值
 #define MIN(_a, _b)						\
 ({								\
 	typeof(_a) __a = (_a);					\
@@ -70,6 +71,7 @@ typedef int32_t off_t;
 #define ARRAY_SIZE(a)	(sizeof(a) / sizeof(a[0]))
 
 // Return the offset of 'member' relative to the beginning of a struct type
+/// 计算成员偏移，先把常量0强制转换为(type*)类型指针，然后对成员取地址，这样地址就是从0开始算的偏移
 #define offsetof(type, member)  ((size_t) (&((type*)0)->member))
 
 #endif /* !JOS_INC_TYPES_H */

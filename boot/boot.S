@@ -30,7 +30,7 @@ seta20.1:
   testb   $0x2,%al
   jnz     seta20.1
 
-  movb    $0xd1,%al               # 0xd1 -> port 0x64
+  movb    $0xd1,%al               # 0xd1 -> port 0x64	
   outb    %al,$0x64
 
 seta20.2:

@@ -91,8 +91,12 @@ CFLAGS += -Wall -Wno-format -Wno-unused -Werror -gstabs -m32
 # mon_backtrace()'s function prologue on gcc version: (Debian 4.7.2-5) 4.7.2
 CFLAGS += -fno-tree-ch
 
+### Stackoverflow (fix triple fault on lab1 first make qemu)
+CFLAGS += -fno-pic
+
 # Add -fno-stack-protector if the option exists.
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
+
 
 # Common linker flags
 LDFLAGS := -m elf_i386
@@ -106,7 +110,8 @@ GCC_LIB := $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
 OBJDIRS :=
 
 # Make sure that 'all' is the first target
-all: warn
+#all: warn
+all:
 
 # Eliminate default suffix rules
 .SUFFIXES:
@@ -146,7 +151,8 @@ QEMUOPTS += $(QEMUEXTRA)
 .gdbinit: .gdbinit.tmpl
 	sed "s/localhost:1234/localhost:$(GDBPORT)/" < $^ > $@
 
-gdb: warn
+#gdb: warn
+gdb:
 	gdb -n -x .gdbinit
 
 pre-qemu: .gdbinit
@@ -283,7 +289,8 @@ tarball-pref: handin-check
 	rm lab$(LAB)-handin.tar
 	rm /tmp/lab$(LAB)diff.patch
 
-myapi.key: warn
+#myapi.key: warn
+myapi.key:
 	@echo Get an API key for yourself by visiting $(WEBSUB)/
 	@read -p "Please enter your API key: " k; \
 	if test `echo -n "$$k" |wc -c` = 32 ; then \
@@ -301,13 +308,13 @@ myapi.key: warn
 		false; \
 	fi;
 
-warn:
-	@echo; \
-	echo "[31m******* WARNING *********"; \
-	echo "this is the 2016 6.828 lab"; \
-	echo "******* WARNING ********* [39m"; \
-	echo; \
-	false;
+#warn:
+#	@echo; \
+#	echo "[31m******* WARNING *********"; \
+#	echo "this is the 2016 6.828 lab"; \
+#	echo "******* WARNING ********* [39m"; \
+#	echo; \
+#	false;
 
 #handin-prep:
 #	@./handin-prep

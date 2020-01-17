@@ -6,20 +6,20 @@
 static inline void
 breakpoint(void)
 {
-	asm volatile("int3");
+	asm volatile("int3");			/// int 3 终端号为3是设置断点
 }
 
-static inline uint8_t
+static inline uint8_t				/// 从端口port读取一个字节
 inb(int port)
 {
-	uint8_t data;
+	uint8_t data;					/// 这里的w表示宽度为word,inb表示输入（in）一个byte
 	asm volatile("inb %w1,%0" : "=a" (data) : "d" (port));
 	return data;
 }
 
-static inline void
-insb(int port, void *addr, int cnt)
-{
+static inline void					/// 以字节为单位，输入字符串，存入addr
+insb(int port, void *addr, int cnt)	/// cld是设置方向flag，rep重复
+{									/// insb从port输入存入(%edi)中，然后%edi++,%ecx--
 	asm volatile("cld\n\trepne\n\tinsb"
 		     : "=D" (addr), "=c" (cnt)
 		     : "d" (port), "0" (addr), "1" (cnt)
