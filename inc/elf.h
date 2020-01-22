@@ -23,9 +23,9 @@ struct Elf {				// 这个数据结构是ELF头部
 
 struct Proghdr {			// Program header描述一个段的位置和大小
 	uint32_t p_type;		// 当前描述的段的类型
-	uint32_t p_offset;		// 段的第一个字节在文件中的偏移
-	uint32_t p_va;			// 段的一个字节在内存中的虚拟地址
-	uint32_t p_pa;			// 此项是为物理地址保留
+	uint32_t p_offset;		// 段的第一个字节在文件中的偏移（即硬盘中的LBA地址）
+	uint32_t p_va;			// 段的第一个字节在内存中的虚拟地址
+	uint32_t p_pa;			// 此项是为物理地址保留（也就操作系统引导内核时用这个）
 	uint32_t p_filesz;		// 段在文件中的长度
 	uint32_t p_memsz;		// 段在内存中的长度
 	uint32_t p_flags;		// 与段相关的标志
