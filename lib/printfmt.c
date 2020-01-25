@@ -206,10 +206,13 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 		// (unsigned) octal
 		case 'o':
 			// Replace this with your code.
-			putch('X', putdat);
-			putch('X', putdat);
-			putch('X', putdat);
-			break;
+//			putch('X', putdat);
+//			putch('X', putdat);
+//			putch('X', putdat);
+			num = getuint(&ap, lflag);	// 无符号
+			base = 8;					// 八进制
+			goto number;				// 打印
+//			break;
 
 		// pointer
 		case 'p':
@@ -243,7 +246,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 	}
 }
 
-void
+void				// 顶层接口，putch和putdat适应不同打印需求
 printfmt(void (*putch)(int, void*), void *putdat, const char *fmt, ...)
 {
 	va_list ap;
@@ -253,13 +256,13 @@ printfmt(void (*putch)(int, void*), void *putdat, const char *fmt, ...)
 	va_end(ap);
 }
 
-struct sprintbuf {
+struct sprintbuf {	// 字符串缓冲区数据结构，ebuf表示字符串的结尾
 	char *buf;
 	char *ebuf;
 	int cnt;
 };
 
-static void
+static void			// 把字符ch存入缓冲区b的下一个位置（预留1字节存'\0'）
 sprintputch(int ch, struct sprintbuf *b)
 {
 	b->cnt++;
@@ -267,7 +270,7 @@ sprintputch(int ch, struct sprintbuf *b)
 		*b->buf++ = ch;
 }
 
-int
+int					// 把fmt打印到字符串缓冲区buf中，限制长度为n
 vsnprintf(char *buf, int n, const char *fmt, va_list ap)
 {
 	struct sprintbuf b = {buf, buf+n-1, 0};
@@ -284,7 +287,7 @@ vsnprintf(char *buf, int n, const char *fmt, va_list ap)
 	return b.cnt;
 }
 
-int
+int					// 顶层接口，和C标准中接口一致
 snprintf(char *buf, int n, const char *fmt, ...)
 {
 	va_list ap;

@@ -24,6 +24,7 @@ struct Command {
 static struct Command commands[] = {
 	{ "help", "Display this list of commands", mon_help },
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
+	{ "backtrace", "Call mon_backtrace function", mon_backtrace },
 };
 
 /***** Implementations of basic kernel monitor commands *****/
@@ -58,6 +59,23 @@ int
 mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 {
 	// Your code here.
+	cprintf("Stack backtrace:\n");
+	uint32_t *ebp = (uint32_t *)read_ebp();
+	while(ebp != NULL){			// 根据entry.S可知，%ebp为0时表示到了内核初始化之前的状态了
+		uint32_t eip = *(ebp + 1);		// 获取返回地址
+		cprintf("  ebp %08x  eip %08x  args", ebp, eip);
+		for(int i=2;i<7;i++){			// 获取参数
+			cprintf(" %08x", *(ebp + i));
+		}
+		cprintf("\n");
+		
+		struct Eipdebuginfo info;
+		if(debuginfo_eip(eip, &info) < 0)
+			cprintf("Error debuginfo_eip\n");
+		else cprintf("         %s:%d: %.*s+%d\n", info.eip_file, info.eip_line,
+				info.eip_fn_namelen, info.eip_fn_name, eip - info.eip_fn_addr);
+		ebp = (uint32_t *)*ebp;			// 进入上一层函数
+	}
 	return 0;
 }
 
@@ -112,9 +130,13 @@ monitor(struct Trapframe *tf)
 {
 	char *buf;
 
-	cprintf("Welcome to the JOS kernel monitor!\n");
-	cprintf("Type 'help' for a list of commands.\n");
-
+	cprintf("\033[31;47mWelcome to the JOS kernel monitor!\033[0m\n");
+	cprintf("\033[34;43mType 'help' for a list of commands.\033[0m\n");
+	
+/*	// 为了测试问题4
+	unsigned int i = 0x00646c72;
+	cprintf("\033[0;32;40m H%x Wo%s", 57616, &i);
+*/
 
 	while (1) {
 		buf = readline("K> ");

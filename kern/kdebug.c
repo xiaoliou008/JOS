@@ -4,7 +4,7 @@
 #include <inc/assert.h>
 
 #include <kern/kdebug.h>
-
+// 下面这四个在头文件里是没有的，其实是kernel.ld里面定义的
 extern const struct Stab __STAB_BEGIN__[];	// Beginning of stabs table
 extern const struct Stab __STAB_END__[];	// End of stabs table
 extern const char __STABSTR_BEGIN__[];		// Beginning of string table
@@ -81,7 +81,7 @@ stab_binsearch(const struct Stab *stabs, int *region_left, int *region_right,
 		}
 	}
 
-	if (!any_matches)
+	if (!any_matches)		// 没找到
 		*region_right = *region_left - 1;
 	else {
 		// find rightmost region containing 'addr'
@@ -117,7 +117,7 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 	info->eip_fn_narg = 0;
 
 	// Find the relevant set of stabs
-	if (addr >= ULIM) {
+	if (addr >= ULIM) {		// ULIM = KSTACKTOP - 2*PTSIZE，这是在memlayout.h里面的
 		stabs = __STAB_BEGIN__;
 		stab_end = __STAB_END__;
 		stabstr = __STABSTR_BEGIN__;
@@ -179,7 +179,13 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 	//	Look at the STABS documentation and <inc/stab.h> to find
 	//	which one.
 	// Your code here.
-
+	stab_binsearch(stabs, &lline, &rline, N_SLINE, addr);
+	if(lline <= rline){
+//		info->eip_line = lline;
+		info->eip_line = stabs[lline].n_desc;
+	} else {		/// not found
+		return -1;
+	}
 
 	// Search backwards from the line number for the relevant filename
 	// stab.

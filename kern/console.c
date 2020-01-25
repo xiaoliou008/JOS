@@ -47,22 +47,22 @@ delay(void)
 
 static bool serial_exists;
 
-static int
+static int		// 从串行端口读入一个字节
 serial_proc_data(void)
-{
+{				// 这里COM1+COM_LST端口应该是状态寄存器的端口号
 	if (!(inb(COM1+COM_LSR) & COM_LSR_DATA))
 		return -1;
 	return inb(COM1+COM_RX);
 }
 
-void
+void			// 中断
 serial_intr(void)
 {
 	if (serial_exists)
 		cons_intr(serial_proc_data);
 }
 
-static void
+static void		// 向串行端口输出一个字节
 serial_putc(int c)
 {
 	int i;
@@ -108,7 +108,7 @@ serial_init(void)
 // For information on PC parallel port programming, see the class References
 // page.
 
-static void
+static void		// 输出一个字节到并行端口
 lpt_putc(int c)
 {
 	int i;
@@ -125,20 +125,20 @@ lpt_putc(int c)
 
 /***** Text-mode CGA/VGA display output *****/
 
-static unsigned addr_6845;
-static uint16_t *crt_buf;
-static uint16_t crt_pos;
+static unsigned addr_6845;		// 端口号
+static uint16_t *crt_buf;		// 缓冲区位置
+static uint16_t crt_pos;		// 光标位置
 
-static void
+static void		// 获取上面的三个变量，并获取光标的位置
 cga_init(void)
 {
 	volatile uint16_t *cp;
 	uint16_t was;
 	unsigned pos;
-
+	/// CGA_BUF = 0xB8000, CGA_BASE = 0x3D4
 	cp = (uint16_t*) (KERNBASE + CGA_BUF);
 	was = *cp;
-	*cp = (uint16_t) 0xA55A;
+	*cp = (uint16_t) 0xA55A;		// ???
 	if (*cp != 0xA55A) {
 		cp = (uint16_t*) (KERNBASE + MONO_BUF);
 		addr_6845 = MONO_BASE;
@@ -158,13 +158,16 @@ cga_init(void)
 }
 
 
-
+//static int debug_cnt = 0;
 static void
 cga_putc(int c)
 {
 	// if no attribute given, then use black on white
+	// 如果要加颜色，应该就是修改这里的代码？
+	//if(!(debug_cnt++)) cprintf("debug\n");
 	if (!(c & ~0xFF))
 		c |= 0x0700;
+//		c |= 0x010f;		/// try
 
 	switch (c & 0xff) {
 	case '\b':
@@ -192,6 +195,7 @@ cga_putc(int c)
 	}
 
 	// What is the purpose of this?
+	// 这里就是如果光标移出了屏幕范围，则删除最上面那一行，然后下面加一行（填充空格），光标就能显示出来了
 	if (crt_pos >= CRT_SIZE) {
 		int i;
 
@@ -392,7 +396,7 @@ static struct {
 
 // called by device interrupt routines to feed input characters
 // into the circular console input buffer.
-static void
+static void		// 使用proc从不同的设备读取数据，并存入终端环形缓冲区中
 cons_intr(int (*proc)(void))
 {
 	int c;
@@ -400,7 +404,7 @@ cons_intr(int (*proc)(void))
 	while ((c = (*proc)()) != -1) {
 		if (c == 0)
 			continue;
-		cons.buf[cons.wpos++] = c;
+		cons.buf[cons.wpos++] = c;	
 		if (cons.wpos == CONSBUFSIZE)
 			cons.wpos = 0;
 	}
@@ -429,12 +433,13 @@ cons_getc(void)
 }
 
 // output a character to the console
-static void
+static void		// 这里可以把lpt_putc和cga_putc注释掉，似乎暂时没影响
 cons_putc(int c)
 {
+//	if(c == 0x1b) c = 0x20;
 	serial_putc(c);
-	lpt_putc(c);
-	cga_putc(c);
+//	lpt_putc(c);
+//	cga_putc(c);
 }
 
 // initialize the console devices
@@ -445,7 +450,7 @@ cons_init(void)
 	kbd_init();
 	serial_init();
 
-	if (!serial_exists)
+	if (!serial_exists)		// 这里面其实也调用了printf.c里的函数
 		cprintf("Serial port does not exist!\n");
 }
 
@@ -458,7 +463,7 @@ cputchar(int c)
 	cons_putc(c);
 }
 
-int
+int		// 所以如果终端缓冲区中没有内容，就一直在这个死循环中
 getchar(void)
 {
 	int c;
@@ -468,7 +473,7 @@ getchar(void)
 	return c;
 }
 
-int
+int		// 这readline要怎么用它呢？
 iscons(int fdnum)
 {
 	// used by readline

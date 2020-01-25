@@ -11,8 +11,8 @@ breakpoint(void)
 
 static inline uint8_t				/// 从端口port读取一个字节
 inb(int port)
-{
-	uint8_t data;					/// 这里的w表示宽度为word,inb表示输入（in）一个byte
+{/// 这里的w表示宽度为word,inb表示输入（in）一个byte，因为port这里是int，所以需要截断，要说明存入%dx而非%edx
+	uint8_t data;					
 	asm volatile("inb %w1,%0" : "=a" (data) : "d" (port));
 	return data;
 }
