@@ -1,0 +1,14 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[remote "origin"]
+	url = https://pdos.csail.mit.edu/6.828/2016/jos.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "lab1"]
+	remote = origin
+	merge = refs/heads/lab1
+[branch "lab2"]
+	remote = origin
+	merge = refs/heads/lab2
